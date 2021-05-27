@@ -270,6 +270,7 @@ public class UploadController {
             file.delete();
 
             if (type.equals("image")) {
+                // 원본 파일도 삭제
                 String largeFileName = file.getAbsolutePath().replace("s_", "");
 
                 log.info("largeFileName: " + largeFileName);
@@ -282,7 +283,7 @@ public class UploadController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>("deleted", HttpStatus.OK);
+        return new ResponseEntity<>("deleted!", HttpStatus.OK);
     }
 
 }

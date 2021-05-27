@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.zerock.mapper.BoardMapper"> <!-- interface -->
+    <sql id="criteria">
+        <trim prefix="(" suffix=") AND " prefixOverrides="OR">
+            <foreach item="type" collection="typeArr"> <!-- parameter의 method, get 제거 -->
+                <trim prefix="OR">
+                    <choose>
+                        <when test="type == 'T'.toString()"> <!-- Character to String -->
+                            title like '%' || #{keyword} || '%'
+                        </when>
+                        <when test="type == 'C'.toString()">
+                            content like '%' || #{keyword} || '%'
+                        </when>
+                        <when test="type == 'W'.toString()">
+                            writer like '%' || #{keyword} || '%'
+                        </when>
+                    </choose>
+                </trim>
+            </foreach>
+        </trim>
+    </sql>
+
+    <select id="getTotalCount" resultType="int">
+        SELECT count(*) FROM tbl_board
+        WHERE
+
+        <include refid="criteria"/>
+
+    <![CDATA[
+            bno > 0
+    ]]>
+    </select>
+
+    <select id="getList" resultType="org.zerock.domain.BoardVO">
+    <![CDATA[
+        SELECT * FROM tbl_board
+        WHERE bno > 0
+        ORDER BY bno DESC
+    ]]>
+    </select>
+
+    <!-- (#{pageNum} -1) * #{amount} 다음부터 #{pageNum} * #{amount} 까지 -->
+    <select id="getListWithPaging" resultType="org.zerock.domain.BoardVO">
+        <![CDATA[
+            SELECT bno, title, content, writer, regdate, updatedate, replycnt
+            FROM (
+                    SELECT rownum rn, bno, title, content, writer, regdate, updatedate, replycnt
+                    FROM tbl_board
+                    WHERE
+        ]]>
+
+        <include refid="criteria"/>
+
+        <![CDATA[
+                    rownum <= #{pageNum} * #{amount}
+                    ORDER BY bno DESC
+                 )
+            WHERE rn > (#{pageNum} -1) * #{amount}
+            ORDER BY rn
+        ]]>
+    </select>
+
+    <insert id="insert">
+        INSERT INTO tbl_board (bno, title, content, writer)
+        VALUES (seq_board.nextval, #{title}, #{content}, #{writer})
+    </insert>
+
+    <insert id="insertSelectKey">
+        <selectKey keyProperty="bno" order="BEFORE" resultType="long">
+            SELECT seq_board.nextval FROM dual
+        </selectKey>
+        INSERT INTO tbl_board (bno, title, content, writer)
+        VALUES (#{bno}, #{title}, #{content}, #{writer})
+    </insert>
+
+    <select id="read" resultType="org.zerock.domain.BoardVO">
+        SELECT * FROM tbl_board WHERE bno = #{bno}
+    </select>
+
+    <delete id="delete">
+        DELETE tbl_board WHERE bno = #{bno}
+    </delete>
+
+    <update id="update">
+        UPDATE tbl_board
+        SET title = #{title},
+            content = #{content},
+            writer = #{writer},
+            updateDate = sysdate
+        WHERE bno = #{bno}
+    </update>
+
+    <update id="updateReplyCnt">
+        UPDATE tbl_board
+        set replycnt = replycnt + #{amount}
+        WHERE bno = #{bno}
+    </update>
+</mapper>
