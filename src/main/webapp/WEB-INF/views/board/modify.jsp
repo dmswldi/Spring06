@@ -6,6 +6,15 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+var bno = '<c:out value="${board.bno}"/>';
+</script>
+<script type="text/javascript" src="/resources/js/board/modify.js"></script>
+<link type="text/css" rel="stylesheet" href="/resources/css/board/get.css">
+
 <%@include file="../includes/header.jsp"%>
 
 <div class="row">
@@ -75,46 +84,26 @@
 
 </div>
 <!-- /.row -->
+
+
+<!-- Attached File -->
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card">
+      <div class="card-header">Files</div>
+
+      <div class="card-body">
+        <div class="form-group uploadDiv">
+          <input type="file" name="uploadFile" multiple>
+        </div>
+
+        <div class="uploadResult">
+          <ul>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <%@include file="../includes/footer.jsp"%>
-
-<script type="text/javascript">
-$(document).ready(function(){
-  var formObj = $("form");
-
-  $('button').on("click", function(e){
-     e.preventDefault();
-
-     var operation = $(this).data("oper"); //dataset.oper; (X)
-     console.log('operation? : '+ operation);
-
-     /* Remove */
-     if(operation === 'remove'){// 얘도 empty()하고 bno만 보내도 될텐데...
-       formObj.attr("action", "/board/remove");
-     /* forwarding to List */
-    } else if(operation === 'list'){
-       //self.location = "/board/list";
-       //return;
-       formObj.attr("action", "/board/list").attr("method", "get");
-       var pageNumTag = $('input[name="pageNum"]').clone();// 미리 복제해놓고
-       var amountTag = $('input[name="amount"]').clone();
-       var typeTag = $('input[name="type"]').clone();
-       var keywordTag = $('input[name="keyword"]').clone();
-
-       formObj.empty();// 자식들 remove -> 파라미터 없애기
-       formObj.append(pageNumTag);
-       formObj.append(amountTag);
-       formObj.append(typeTag);
-       formObj.append(keywordTag);
-       // appendTo(): target의 마지막에 element 넣기 (~에 첨부하다), old location 지워짐
-       // -> clone(): element deep copy 사용
-
-       // remove(): 본인 포함 자식 모두 삭제, 이벤트 삭제
-       // detach(): 본인 포함 자식 모두 삭제, 이벤트 유지(데이터 복구 가능)
-       // empty(): 자식 모두 삭제
-       // upwrap(): 부모1 삭제
-    }
-     formObj.submit();
-  });
-
-});
-</script>

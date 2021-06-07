@@ -3,10 +3,14 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+       xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd">
     <!-- Root Context: defines shared resources visible to all other web components -->
+
+    <task:annotation-driven/>
 
     <!-- HikariCP configuration -->
     <bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
@@ -31,4 +35,6 @@
 
     <!-- @Service : 스프링의 빈으로 등록 -->
     <context:component-scan base-package="org.zerock.service"/>
+
+    <context:component-scan base-package="org.zerock.task" />
 </beans>

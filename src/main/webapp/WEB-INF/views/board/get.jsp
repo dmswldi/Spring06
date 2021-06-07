@@ -6,6 +6,10 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<link type="text/css" rel="stylesheet" href="/resources/css/board/get.css">
+
 <%@include file="../includes/header.jsp"%>
 
 <div class="row">
@@ -63,6 +67,29 @@
 </div>
 <!-- /.row -->
 
+<!-- Attached Origin File -->
+<div class="bigPictureWrapper">
+    <div class="bigPicture">
+    </div>
+</div>
+
+<!-- Attached File -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">Files</div>
+
+            <div class="card-body">
+                <div class="uploadResult">
+                    <ul>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reply -->
 <div class="row">
     <div class="col-lg-12">
         <div class="card">
@@ -380,5 +407,68 @@
         });
 
 --%>
+
+        /* 즉시 실행 함수 -> 페이지 로드 시, 댓글 불러오기 */
+        (function(){
+            var bno = '<c:out value="${board.bno}" />';
+
+            $.getJSON("/board/getAttachList", {bno: bno}, function(arr){
+                console.log(arr);
+
+                var str = '';
+
+                $(arr).each(function(i, attach){
+                    if(attach.fileType){// image일 때
+                        var fileCallPath = encodeURIComponent(attach.uploadPath + '/s_' + attach.uuid + "_" + attach.fileName);
+
+                        str += '<li data-path="' + attach.uploadPath + '" data-uuid="' + attach.uuid + '" data-filename="' + attach.fileName + '" data-type="' + attach.fileType + '">'
+                            + '<div><img src="/display?fileName=' + fileCallPath + '"></div>'
+                            + '</li>';
+                    } else {// 일반 파일일 때
+                        str += '<li data-path="' + attach.uploadPath + '" data-uuid="' + attach.uuid + '" data-filename="' + attach.fileName + '" data-type="' + attach.fileType + '">'
+                            + '<div><span>' + attach.fileName + '</span><br>'
+                            + '<img src="/resources/img/attach.png">'
+                            +'</div>'
+                            + '</li>';
+                    }
+                });
+                $('.uploadResult ul').html(str);
+            });
+        })();
+
+        /* 첨부파일 클릭 시 이벤트 처리 */
+        function showImage(fileCallPath){
+            // alert(fileCallPath);
+
+            $('.bigPictureWrapper').css('display', 'flex').show();
+
+            $('.bigPicture')
+            .html('<img src="/display?fileName=' + fileCallPath + '">')
+            .animate({width: '100%', height: '100%'}, 1000);
+        }
+
+        $('.uploadResult').on('click', 'li', function(){
+            console.log('view image');
+
+            var liObj = $(this);// -> 왜 변수에 담아서 써???? 그래야 data-* 읽어지나본데
+
+            var path = encodeURIComponent(liObj.data('path') + "/" + liObj.data('uuid') + "_" + liObj.data('filename'));
+
+            console.log('filetype: ' + liObj.data('type'));//----------> true/false
+            if(liObj.data('type')){// 이미지 보여주기
+                showImage(path.replace(new RegExp(/\\/g), '/'));
+            } else {// 일반 파일 다운로드
+                self.location = '/download?fileName=' + path;// window.self = window itself
+            }
+        });
+
+
+        $('.bigPictureWrapper').on('click', function(e){
+            $('.bigPicture').animate({width: '0%', height: '0%'}, 1000);
+            setTimeout(function(){
+               $('.bigPictureWrapper').hide();
+            }, 500);
+        });
+
     });
 </script>
